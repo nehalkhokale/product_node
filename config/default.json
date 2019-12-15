@@ -1,0 +1,31 @@
+{
+    "server": {
+        "port": 1000
+    },
+    "app": {
+        "prefix": "/balancesheet",
+        "secret": "longlivenodejsafterallitsjavascript3cheershiphiphurray"
+    },
+    "db": {
+        "mongodb_url": "mongodb://localhost:27017/balancesheet",
+        "db_name": "/balancesheet",
+        "db_options": "",
+        "mongodb_session_store_url": "mongodb://localhost:27017",
+        "session_db_name": "/balancesheet",
+        "session_db_options": "?"
+    },
+    "auth": {
+        "token_validity": 3600,        
+        "cookie_validity": 3600        
+    },
+    "cookie": {
+        "path": "/balancesheet",
+        "name": "ril_xsprs_sid",
+        "validity": 3600
+    },
+    "token": {
+        "validity": 86400,
+        "refreshValidity": 604800,
+        "secret": "longlivenodejsafterallitsjavascript3cheershiphiphurray"
+    }
+}
