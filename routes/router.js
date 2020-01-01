@@ -19,7 +19,7 @@ router.post('/user/login', User.login)
 router.get('/v1/auth/me', User.me)
 
 //Protected routes 
-// router.use(User.verifyToken)
+router.use(User.verifyToken)
 
 router.post('/user/changepassword', User.changePassword)
 router.post('/createuser', User.create)
@@ -40,9 +40,9 @@ router.put('/deletecategory/:id', Category.notAciveCategory)
 router.delete('/category/:id', Category.deleteCategory)
 
 //Expense
-router.post('/expense', Expense.createExpense)
+router.post('/createexpense', Expense.createExpense)
 router.put('/expense/:id', Expense.updateExpense)
-router.get('/expense', Expense.getAllExpense)
+router.get('/expenselist', Expense.getAllExpense)
 router.get('/expense/getsubcategory/:id',Expense.addSubCategory)
 router.delete('/expense/expensenotactive/:id', Expense.notAciveExpense)
 router.delete('/expense/:id', Expense.deleteExpense)
