@@ -16,10 +16,11 @@ router.get('/', (req, res) => {
 //Users 
 router.post('/user/register', User.register)
 router.post('/user/login', User.login)
-router.get('/v1/auth/me', User.me)
 
 //Protected routes 
 router.use(User.verifyToken)
+
+router.get('/v1/auth/me', User.me)
 
 router.post('/user/changepassword', User.changePassword)
 router.post('/createuser', User.create)
@@ -48,7 +49,7 @@ router.delete('/expense/expensenotactive/:id', Expense.notAciveExpense)
 router.delete('/expense/:id', Expense.deleteExpense)
 router.delete('/expense/subcatnotactive/:id', Expense.setNotActiveSubCat)
 router.post('/getreport', Expense.report)
-
+// router.post('/testexpense',Expense.areDifferentByIds)
 //Role
 router.post('/createrole', Roles.create)
 router.put('/updaterole/:id', Roles.update)

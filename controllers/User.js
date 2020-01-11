@@ -147,6 +147,7 @@ module.exports.changePassword = (req, res, next) => {
         }
     })
 }
+
 module.exports.verifyToken = (req, res, next) => {
     //  get the token from the request
     let Bearer = null
@@ -178,7 +179,7 @@ module.exports.verifyToken = (req, res, next) => {
         })
         //  let dbToken = null
         let q = { email: user }
-        console.log(q)
+        console.log('q', q)
         let willGetAUser = User.findOne(q).exec()
         assert.ok(willGetAUser instanceof Promise)
         willGetAUser
@@ -209,35 +210,38 @@ module.exports.verifyToken = (req, res, next) => {
         return handle401Error({ 'message': constants.INVALID_SESSION }, req, res, next)
     }
 }
+
 module.exports.me = (req, res, next) => {
+    
     let Bearer = null
     if (req.headers['authorization']) Bearer = req.headers['authorization'].split(' ')[1]
     const token = req.body.token || req.query.token || req.headers['x-access-token'] || Bearer
-    //  const sessionToken = req.session.token
 
+    console.log('req.session', req.session.user)
     let _email = null
-    if (req.session.user) {
+    if(req.session.user) {
         _email = req.session.user.toLowerCase()
     } else {
         return handle403Error({ 'message': constants.INVALID_SESSION }, req, res, next)
     }
-    console.log(req.session)
-    console.log(_email)
+    console.log('req.session again', req.session)
+    console.log('_email', _email)
     let dbToken = null
     let willGetAToken = Token.findOne({ email: _email }).exec()
     assert.ok(willGetAToken instanceof Promise)
     willGetAToken.then((doc) => {
-        console.log(doc)
+        console.log('doc', doc)
         dbToken = doc.token
         if ((null === dbToken) || (!dbToken === token)) return handle403Error({ 'message': constants.INVALID_TOKEN }, req, res, next)
         let resData = req.session
         // user info here
-        console.log(resData)
-        console.log(_email)
-        if(dbToken ===token){
+        // console.log(resData)
+        // console.log(_email)
+        console.log('token', token)
+        console.log('dbToken', dbToken)
+        if(dbToken === token){
             res.json({ error: false, success: true, message:'valid token', data: [] })
-        }
-        else{
+        } else {
             res.json({ error: true, success: false, message:'invalid token', data: [] })
         }
         // User.findOne({ 'email': _email }).exec()
@@ -251,6 +255,7 @@ module.exports.me = (req, res, next) => {
         return handle403Error({ 'message': constants.INVALID_TOKEN }, req, res, next)
     })
 }
+
 module.exports.create = function (req, res, next) {
     let user = req.body
     User.create(user, function (err, userDoc) {
