@@ -49,7 +49,9 @@ router.delete('/expense/expensenotactive/:id', Expense.notAciveExpense)
 router.delete('/expense/:id', Expense.deleteExpense)
 router.delete('/expense/subcatnotactive/:id', Expense.setNotActiveSubCat)
 router.post('/getreport', Expense.report)
-// router.post('/testexpense',Expense.areDifferentByIds)
+router.put('/expense/getexpensebyid/:id',Expense.getOneExpense)
+router.put('/expense/editcatexpense/:id',Expense.editOneCatExpense)
+
 //Role
 router.post('/createrole', Roles.create)
 router.put('/updaterole/:id', Roles.update)

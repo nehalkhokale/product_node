@@ -747,6 +747,90 @@ module.exports.notAciveExpense = function (req, res, next) {
 
 
 }
+module.exports.editOneCatExpense = function (req, res, next) {
+    let expenseCat = req.body
+    let _id =(req.params.id)
+    // console.log('-- in getoneexpense req.session',req.session.userInfo._id,_id);
+    
+    Expense.findOne({ '_id':expenseCat._id, 'isActive': true,'createdBy._id':req.session.userInfo._id}, function (err, expenseByIdDoc) {
+        if (err) return handleError(err, req, res, next)
+        // console.log('expenseCat',expenseCat,);
+        
+        let docModified = JSON.parse(JSON.stringify(expenseByIdDoc))
+        // console.log('-- before editCategory',docModified.ExpenseDetails[0].categoryObj.subCategory[0]);
+        let count
+        // let activeCat = []
+        let editCategory
+        expenseByIdDoc.ExpenseDetails.forEach((subCat, indexSub) => {
+            // let isActivSubCat = []
+            console.log('---subCat',( expenseCat.categoryObj._id._id) === ( subCat.categoryObj._id));
+            
+            if (( expenseCat.categoryObj._id._id) === ( subCat.categoryObj._id)) {
+                // expenseByIdDoc
+                docModified.ExpenseDetails[indexSub].categoryObj.subCategory =expenseCat.categoryObj.subCategory
+                subCat.categoryObj.subCategory.forEach((amount,i)=>{
+                    amount.details.forEach((addAmount , addAmountIndex)=>{                        
+                        count = count + addAmount.amount
+                        if(addAmountIndex === amount.details.length-1 ){
+                            docModified.ExpenseDetails[indexSub].categoryObj.subCategory.amount = count
+                            count = 0
+                        }
+
+                    })
+                })
+                console.log('-- heree docModified',docModified.ExpenseDetails[indexSub].categoryObj.subCategory[0]);
+
+            }
+        })
+    Expense.update({'_id':expenseCat._id}, {'ExpenseDetails':docModified.ExpenseDetails}, function (err, updatedExpense) {
+        if (err) return handleError(err, req, res, next)
+        res.json({ error: false, success: true, message: '', data: updatedExpense })
+
+
+    })
+        
+    })
+
+}
+module.exports.getOneExpense = function (req, res, next) {
+    let expenseCat = req.body
+    let _id =(req.params.id)
+    console.log('-- in getoneexpense req.session',req.session.userInfo._id,_id);
+    
+    Expense.findOne({ '_id':_id, 'isActive': true,'createdBy._id':req.session.userInfo._id}, function (err, expenseByIdDoc) {
+        if (err) return handleError(err, req, res, next)
+        console.log('expenseCat',expenseCat,expenseByIdDoc);
+        
+        // let activeCat = []
+        let editCategory
+        expenseByIdDoc.ExpenseDetails.forEach((subCat, indexSub) => {
+            // let isActivSubCat = []
+            console.log('---subCat',( expenseCat.categoryId) ,( subCat._id.toString()));
+            
+            if (( expenseCat.categoryId) === ( subCat._id.toString())) {
+                editCategory = subCat
+            }
+        })
+        console.log('--editCategory',editCategory);
+        
+        let obj = {
+            _id: expenseByIdDoc._id,
+            category: editCategory._id,
+            subCategory: editCategory.categoryObj.subCategory,
+            createdAt: expenseByIdDoc.createdAt,
+            updatedAt: expenseByIdDoc.updatedAt,
+            isActive: expenseByIdDoc.isActive,
+            createdBy:expenseByIdDoc.createdBy,
+            expenseDate:expenseByIdDoc.expenseDate
+        }
+        // activeCat = activeCat.concat(obj)
+
+        console.log('---obj', obj);
+
+        res.json({ error: false, success: true, message: '', data: obj })
+    })
+
+}
 module.exports.deleteExpense = function (req, res, next) {
     let _id = req.params.id
     let expense = req.body
@@ -784,15 +868,15 @@ module.exports.deleteExpense = function (req, res, next) {
 }
 module.exports.report = function (req, res, next) {
     let expense = req.body
-    Expense.find({}, (err, doc) => {
+    Expense.find({}).populate({path:'ExpenseDetails.categoryObj._id'}).exec( (err, doc) => {
         if (err) return handleError(err, res, req, next)
         let i = []
         if (expense.startDate) {
             doc.forEach(function (ele, index) {
-                console.log('ele.expenseDate', ele.expenseDate, new Date(new Date(expense.startDate).setHours(0, 0, 0, 0)), (new Date(expense.startDate).setHours(0, 0, 0, 0)), new Date(new Date(expense.endDate).setHours(0, 0, 0, 0)));
+                // console.log('ele.expenseDate', ele.expenseDate, new Date(new Date(expense.startDate).setHours(0, 0, 0, 0)), (new Date(expense.startDate).setHours(0, 0, 0, 0)), new Date(new Date(expense.endDate).setHours(0, 0, 0, 0)));
                 let dateObj = new Date(ele.expenseDate) >= new Date(new Date(expense.startDate).setHours(0, 0, 0, 0))
                     && new Date(ele.expenseDate) <= new Date(new Date(expense.endDate).setHours(23, 59, 59, 999))
-                console.log('dateObj', dateObj);
+                // console.log('dateObj', dateObj);
                 if (dateObj) {
                     i = i.concat(ele)
                 }
