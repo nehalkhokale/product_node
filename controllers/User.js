@@ -65,7 +65,7 @@ exports.login = (req, res, next) => {
                 }
 
                 req.session.token = token
-                console.log('----after', req.session);
+                // console.log('----after', req.session);
 
                 res.json({
                     success: true,
@@ -186,6 +186,7 @@ module.exports.verifyToken = (req, res, next) => {
             .then((doc) => {
                 // console.log(doc)
                 req.session.userInfo = doc
+                // req.session.user = req.session.userInfo.email
                 let willGetAToken = Token.findOne(q).exec()
                 assert.ok(willGetAToken instanceof Promise)
                 willGetAToken
@@ -217,29 +218,31 @@ module.exports.me = (req, res, next) => {
     if (req.headers['authorization']) Bearer = req.headers['authorization'].split(' ')[1]
     const token = req.body.token || req.query.token || req.headers['x-access-token'] || Bearer
 
-    console.log('req.session', req.session.user)
+    // console.log('--00 req.session', req.session.user,req.session)
     let _email = null
-    if(req.session.user) {
-        _email = req.session.user.toLowerCase()
+    if(req.session.userInfo.email) {
+        // req.session.user = req.session.userInfo.email
+        _email = req.session.userInfo.email.toLowerCase()
     } else {
         return handle403Error({ 'message': constants.INVALID_SESSION }, req, res, next)
     }
-    console.log('req.session again', req.session)
-    console.log('_email', _email)
+    // console.log('==-11 req.session again', req.session)
+    // console.log('--- 1_email', _email)
     let dbToken = null
     let willGetAToken = Token.findOne({ email: _email }).exec()
     assert.ok(willGetAToken instanceof Promise)
     willGetAToken.then((doc) => {
-        console.log('doc', doc)
+        // console.log('--1 doc', doc)
         dbToken = doc.token
         if ((null === dbToken) || (!dbToken === token)) return handle403Error({ 'message': constants.INVALID_TOKEN }, req, res, next)
         let resData = req.session
         // user info here
         // console.log(resData)
         // console.log(_email)
-        console.log('token', token)
-        console.log('dbToken', dbToken)
+        // console.log('1 --token', token)
+        // console.log('1-- dbToken', dbToken)
         if(dbToken === token){
+
             res.json({ error: false, success: true, message:'valid token', data: [] })
         } else {
             res.json({ error: true, success: false, message:'invalid token', data: [] })

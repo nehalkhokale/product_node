@@ -91,6 +91,8 @@ session.Session.prototype.login = (req, user, cb) => {
     try {
         req.session.userInfo = user
         req.session.user = user.email
+        // console.log(' in session login', req.session.user);
+        
         cb()
     } catch (error) {
         cb(error)

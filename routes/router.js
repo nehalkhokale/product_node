@@ -49,6 +49,7 @@ router.delete('/expense/expensenotactive/:id', Expense.notAciveExpense)
 router.delete('/expense/:id', Expense.deleteExpense)
 router.delete('/expense/subcatnotactive/:id', Expense.setNotActiveSubCat)
 router.post('/getreport', Expense.report)
+router.post('/dateWiseReport',Expense.dateWiseReport)
 router.put('/expense/getexpensebyid/:id',Expense.getOneExpense)
 router.put('/expense/editcatexpense/:id',Expense.editOneCatExpense)
 

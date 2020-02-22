@@ -6,11 +6,12 @@ handleError = function (err, req, res, next) {
 }
 module.exports.createExpense = function (req, res, next) {
     let expense = req.body
+    let expenseDup = JSON.parse(JSON.stringify(expense))
     let data = []
     // let numberCheck = "^[0-9]*$"
     let _userInfo = req.session.userInfo
     // console.log('---_userInfo',_userInfo);
-    // let flag = false
+    let Respflag = false
     let detail
     let createdBy = {
         _id: _userInfo._id,
@@ -22,64 +23,71 @@ module.exports.createExpense = function (req, res, next) {
     expense.createdBy = createdBy
     // let subCategory=[]
     if(expense.expenseDate){
-    initialLoop: for (var exp = 0; exp < expense.ExpenseDetails.length; exp++) {
+        Respflag= true
+        initialLoop: for (var exp = 0; exp < expense.ExpenseDetails.length; exp++) {
               
-        let subCategory = []
-        
-        loop2: for (var index = 0; index < expense.ExpenseDetails[exp].categoryObj.subCategory.length; index++) {
+            let subCategory = []
+            // console.log('--in loop 1');
+                loop2: for (var index = 0; index < expenseDup.ExpenseDetails[exp].categoryObj.subCategory.length; index++) {
 
-            // expense.ExpenseDetails[exp].categoryObj.subCategory.forEach((element, index) => {
-            console.log('--in loop 2');
-            
-            if (expense.ExpenseDetails[exp].categoryObj.subCategory[index].amount && expense.ExpenseDetails[exp].categoryObj.subCategory[index].paymentMode) {
-                // if(element.amount == /^[0-9]+$/){
-                subCategory = subCategory.concat(expense.ExpenseDetails[exp].categoryObj.subCategory[index])
-                // }
-                console.log('-- if in loop 2');
-
-            }
-            console.log(' here man');
-            
-            if (expense.ExpenseDetails[exp].categoryObj.subCategory.length - 1 === index) {
-                
-                expense.ExpenseDetails[exp].categoryObj.subCategory = subCategory
-                console.log('-- final in loop 2',expense.ExpenseDetails[exp].categoryObj);
-
-                if (expense.ExpenseDetails[exp].categoryObj.subCategory.length > 0) {
-                    console.log('-- manananan in loop 2');
-
-                    data = data.concat(expense.ExpenseDetails[exp]);
-                }
-                if(data.length > 0){
-
-                if (expense.ExpenseDetails.length - 1 === exp) {
-                    expense.ExpenseDetails = data
-                    // console.log('--expense',expense);
-                    if (expense.ExpenseDetails.length > 0) {
+                    // expense.ExpenseDetails[exp].categoryObj.subCategory.forEach((element, index) => {
+                    // console.log('--in loop 2');
+                    
+                    if (expense.ExpenseDetails[exp].categoryObj && expense.ExpenseDetails[exp].categoryObj.subCategory[index].amount && expense.ExpenseDetails[exp].categoryObj.subCategory[index].paymentMode) {
+                        // if(element.amount == /^[0-9]+$/){
+                        subCategory = subCategory.concat(expense.ExpenseDetails[exp].categoryObj.subCategory[index])
+                        // }
+                        console.log('-- if in loop 2');
+    
                     }
+                    console.log(' here man');
+                    
+                    if (expense.ExpenseDetails[exp].categoryObj.subCategory.length - 1 === index) {
+                        
+                        expense.ExpenseDetails[exp].categoryObj.subCategory = subCategory
+                        console.log('-- final in loop 2',expense.ExpenseDetails[exp].categoryObj);
+    
+                        if (expense.ExpenseDetails[exp].categoryObj.subCategory.length > 0) {
+    
+                            data = data.concat(expense.ExpenseDetails[exp]);
+                            console.log('-- manananan in loop 2',data);
+    
+                        }
+                        if(data.length > 0){
+                            console.log('--here in data lenght >0',expense.ExpenseDetails[exp].categoryObj.subCategory.length);
+                            
+                        if (expense.ExpenseDetails.length - 1 === exp) {
+                            expense.ExpenseDetails = data
+                            console.log('--expense',expense);
+                            // if (expense.ExpenseDetails.length > 0) {
+                            // }
+                            
+                        }
+                    }else if(!Respflag){
+                        res.json({success: false, error: true, message: 'NO exepense found ,Please enter expenses', data: []})
+    
+                    }
+                    console.log('-- out of here in data lenght >0');
+    
+                    }
+                    console.log('--00 if --',expense.ExpenseDetails[exp],exp);
                     
                 }
-            }else{
-                res.json({success: false, error: true, message: 'NO exepense found ,Please enter expenses', data: []})
+                console.log('--00 if --2');
+            
+            console.log('---here--- in 1st if');
 
-            }
-
-            }
-
+            // })
         }
-        console.log('---here');
-
-        // })
-    }
-}else{
-    res.json({success: false, error: true, message: 'Please enter valid date', data: []})
-    }
+    }else if(!Respflag){
+        res.json({success: false, error: true, message: 'Please enter valid date', data: []})
+        }
 
 
     dateMatch(expense).then((data)=>{
 
         createAndEdit(data.expenseUpdate, expense, data.flag, data)
-        console.log('-------------final logs with valid subcat',expense.ExpenseDetails[0].categoryObj.subCategory);
+        // console.log('-------------final logs with valid subcat',expense.ExpenseDetails[0].categoryObj.subCategory);
     })
     // .then((resdetailsUpdate)=>{
     //     console.log('---detailsUpdate');
@@ -152,17 +160,17 @@ function dateMatch(expense){
 
 }
 function earlier(edit, expense, flag, data) {
-    console.log('flag', expense);
+    // console.log('flag', expense);
 
     if (flag) {
         let catIndex
         Expense.findById(data._id, async function (err, expenseUpdate) {
             for (var j = 0; j < expense.ExpenseDetails.length; j++) {
                 for (var k = 0; k < edit.ExpenseDetails.length; k++) {
-                    console.log('----initial');
+                    // console.log('----initial');
 
                     if (edit.ExpenseDetails[k].categoryObj._id === expense.ExpenseDetails[j].categoryObj._id) {
-                        console.log('---if ===');
+                        // console.log('---if ===');
                         catIndex = k
                         let index
                         let newCategory = []
@@ -170,16 +178,16 @@ function earlier(edit, expense, flag, data) {
                         let sameSub = false
 
                         for (var l = 0; l < expense.ExpenseDetails[j].categoryObj.subCategory.length; l++) {
-                            console.log('---- in 3 rd for');
+                            // console.log('---- in 3 rd for');
                             let sameSubUpdate
                             for (var m = 0; m < edit.ExpenseDetails[k].categoryObj.subCategory.length; m++) {
-                                console.log('--- in 4 th for');
+                                // console.log('--- in 4 th for');
 
                                 let jValue = JSON.parse(JSON.stringify(j))
                                 let lValue = JSON.parse(JSON.stringify(l))
                                 let subCatIndex = JSON.parse(JSON.stringify(m))
                                 if (edit.ExpenseDetails[catIndex].categoryObj.subCategory[subCatIndex].name === expense.ExpenseDetails[jValue].categoryObj.subCategory[lValue].name) {
-                                    console.log('---in first loop if ', jValue, lValue, subCatIndex, catIndex);
+                                    // console.log('---in first loop if ', jValue, lValue, subCatIndex, catIndex);
                                     sameSub = true
                                     await Expense.findOneAndUpdate(
                                         {
@@ -200,9 +208,9 @@ function earlier(edit, expense, flag, data) {
 
                                             else {
                                                 sameSubUpdate = Update1
-                                                console.log('---here 4', [`ExpenseDetails.${catIndex}.categoryObj.subCategory.${subCatIndex}.amount`], [`ExpenseDetails.${catIndex}.categoryObj.subCategory.${subCatIndex}.paymentMode`], expense.ExpenseDetails[jValue].categoryObj.subCategory[lValue].paymentMode);
-                                                console.log('---- 44', expense.ExpenseDetails[jValue].categoryObj.subCategory[lValue].amount +
-                                                    edit.ExpenseDetails[catIndex].categoryObj.subCategory[subCatIndex].amount, Update1.ExpenseDetails[0].categoryObj.subCategory[0]);
+                                                // console.log('---here 4', [`ExpenseDetails.${catIndex}.categoryObj.subCategory.${subCatIndex}.amount`], [`ExpenseDetails.${catIndex}.categoryObj.subCategory.${subCatIndex}.paymentMode`], expense.ExpenseDetails[jValue].categoryObj.subCategory[lValue].paymentMode);
+                                                // console.log('---- 44', expense.ExpenseDetails[jValue].categoryObj.subCategory[lValue].amount +
+                                                    // edit.ExpenseDetails[catIndex].categoryObj.subCategory[subCatIndex].amount, Update1.ExpenseDetails[0].categoryObj.subCategory[0]);
 
                                             }
 
@@ -214,8 +222,8 @@ function earlier(edit, expense, flag, data) {
                                     arrayK = k
                                     if (lValue === expense.ExpenseDetails[jValue].categoryObj.subCategory.length - 1 &&
                                         subCatIndex === edit.ExpenseDetails[catIndex].categoryObj.subCategory.length - 1) {
-                                        console.log('---jValue  jValue', jValue, lValue, subCatIndex, catIndex);
-                                        console.log('--newCategory', newCategory, sameSubUpdate);
+                                        // console.log('---jValue  jValue', jValue, lValue, subCatIndex, catIndex);
+                                        // console.log('--newCategory', newCategory, sameSubUpdate);
                                         await Expense.findOneAndUpdate(
                                             {
                                                 '_id': data._id,
@@ -234,7 +242,7 @@ function earlier(edit, expense, flag, data) {
                                                 index = Update2.ExpenseDetails[catIndex].categoryObj.subCategory.length - newCategory.length
                                                 // console.log(index);
 
-                                                console.log('---index', index, jValue, lValue, subCatIndex, catIndex, Update2.ExpenseDetails[catIndex].categoryObj.subCategory);
+                                                // console.log('---index', index, jValue, lValue, subCatIndex, catIndex, Update2.ExpenseDetails[catIndex].categoryObj.subCategory);
 
                                                 if (err) console.log('err here ', err);
                                                 else {
@@ -274,7 +282,7 @@ function earlier(edit, expense, flag, data) {
 
                         // // return()
                     } else {
-                        console.log('---here 3', j);
+                        // console.log('---here 3', j);
 
                         await Expense.findOneAndUpdate(
                             {
@@ -306,7 +314,7 @@ function earlier(edit, expense, flag, data) {
         // })
     } else {
         Expense.create(expense, function (err, expenseDoc) {
-            console.log('---created');
+            // console.log('---created');
 
             if (err) console.log('err', err);
 
@@ -327,10 +335,7 @@ function earlier(edit, expense, flag, data) {
                             },
                             { new: true }, function (err, Update) {
                                 if (err) console.log('--err', err);
-                                console.log('n m', n, o);
-
-
-
+                                // console.log('n m', n, o);
                             })
                     }
 
@@ -346,9 +351,9 @@ let newSubCat
 function createAndEdit(edit, expense, flag, data){
    
     return commonAndUncommonCat(expense, edit, data,flag).then((newData) => {
-        console.log('---commonAndUncommonCat');
+        // console.log('---commonAndUncommonCat');
         return AddUncommonCat(newData , edit ,expense,flag).then((repAddUncommonCat) => {
-            console.log('---AddUncommonCat');
+            // console.log('---AddUncommonCat');
             return UncommonSubcat(newData , repAddUncommonCat,flag)
             // .then((resUncommonSubcat)=>{
             //     console.log('---detailsUpdate');
@@ -405,13 +410,13 @@ function commonAndUncommonCat(expense, edit, data ,flag) {
         // Get uncommon entries - let filteUnc
         if (flag) {
             for (var j = 0; j < expense.ExpenseDetails.length; j++) {
-                console.log('---in first for expense.ExpenseDetails[j].categoryObj._id',expense.ExpenseDetails[j].categoryObj._id);
+                // console.log('---in first for expense.ExpenseDetails[j].categoryObj._id',expense.ExpenseDetails[j].categoryObj._id);
                 let catFlag = false
                 for (var k = 0; k < edit.ExpenseDetails.length; k++) {
-                    console.log('--- berfore',expense.ExpenseDetails[j].categoryObj._id,edit.ExpenseDetails[k].categoryObj._id );
+                    // console.log('--- berfore',expense.ExpenseDetails[j].categoryObj._id,edit.ExpenseDetails[k].categoryObj._id );
                    
                     if (edit.ExpenseDetails[k].categoryObj._id === expense.ExpenseDetails[j].categoryObj._id) {
-                        console.log('--- iffffff',edit.ExpenseDetails[k].categoryObj._id);
+                        // console.log('--- iffffff',edit.ExpenseDetails[k].categoryObj._id);
                         catFlag = true
                         commonCat = commonCat.concat(expense.ExpenseDetails[j])
                         for (var l = 0; l < expense.ExpenseDetails[j].categoryObj.subCategory.length; l++) {
@@ -459,14 +464,14 @@ function commonAndUncommonCat(expense, edit, data ,flag) {
                         
                     } else {
                         if( k === edit.ExpenseDetails.length-1 &&  catFlag ==  false){
-                            console.log('--- elseeeee',edit.ExpenseDetails[k].categoryObj._id);
+                            // console.log('--- elseeeee',edit.ExpenseDetails[k].categoryObj._id);
                                 uncommonCat = uncommonCat.concat(expense.ExpenseDetails[j])
                         }
                     }
-                    console.log('--- last berfore',expense.ExpenseDetails[j].categoryObj._id,edit.ExpenseDetails[k].categoryObj._id );
+                    // console.log('--- last berfore',expense.ExpenseDetails[j].categoryObj._id,edit.ExpenseDetails[k].categoryObj._id );
                     
                 }
-                console.log('---in last for expense.ExpenseDetails[j].categoryObj._id',expense.ExpenseDetails[j].categoryObj._id);
+                // console.log('---in last for expense.ExpenseDetails[j].categoryObj._id',expense.ExpenseDetails[j].categoryObj._id);
 
                 if (j === expense.ExpenseDetails.length - 1) {
                     let commonData= {
@@ -488,7 +493,7 @@ function commonAndUncommonCat(expense, edit, data ,flag) {
                 else {
                     for (var n = 0; n < expenseDoc.ExpenseDetails.length; n++) {
                         for (var o = 0; o < expense.ExpenseDetails[n].categoryObj.subCategory.length; o++) {
-                            console.log('n m', n, o);
+                            // console.log('n m', n, o);
     
                             Expense.findOneAndUpdate(
                                 {
@@ -553,7 +558,7 @@ function UncommonSubcat(data , edit,flag){
         // Check by subcategory name, find indexes of subcategory and update
     // Matching subcategories - Push into new array = [{ subcat: {}, catInd: 1, subCatInd: 0 }, { subcat:{}, index: 4 }]
     // Non - matching subcategories - Push into new array
-    console.log('---data',data ,flag);
+    // console.log('---data',data ,flag);
     if(flag){
         // console.log('--- here ',data.newSubData.length);
         if(data.newSubData.length > 0){
@@ -576,15 +581,15 @@ function UncommonSubcat(data , edit,flag){
                         reject(err)
                     }
                     else {
-                        console.log('---Update2',Update2.ExpenseDetails[0].categoryObj.subCategory.length,newSub,data.newSubData.length );
+                        // console.log('---Update2',Update2.ExpenseDetails[0].categoryObj.subCategory.length,newSub,data.newSubData.length );
                         if(newSub === data.newSubData.length ){
-                            console.log('----here Update2',Update2.ExpenseDetails[0].categoryObj.subCategory.length);
+                            // console.log('----here Update2',Update2.ExpenseDetails[0].categoryObj.subCategory.length);
                             for (var k = 0; k < Update2.ExpenseDetails.length; k++) {
-                                console.log('--here in Update2 details 2 ')
+                                // console.log('--here in Update2 details 2 ')
                                 for (var m = 0; m < Update2.ExpenseDetails[k].categoryObj.subCategory.length; m++) {
-                                    console.log('--here in  Update2details 3',Update2.ExpenseDetails[0].categoryObj.subCategory[5])
+                                    // console.log('--here in  Update2details 3',Update2.ExpenseDetails[0].categoryObj.subCategory[5])
                                     if(Update2.ExpenseDetails[k].categoryObj.subCategory[m].details.length === 0 ){
-                                        console.log('--here in Update2 details 4',Update2.ExpenseDetails[0].categoryObj.subCategory[5]);
+                                        // console.log('--here in Update2 details 4',Update2.ExpenseDetails[0].categoryObj.subCategory[5]);
                                         
                                         Expense.findOneAndUpdate(
                                             {
@@ -602,7 +607,7 @@ function UncommonSubcat(data , edit,flag){
                                                     console.log('---erre', err);
                                                     reject(err)
                                                 }else{
-                                                    console.log('-------------details Update2 upadte');
+                                                    // console.log('-------------details Update2 upadte');
                                                     
                                                     resolve(Update3)
                                                 }   
@@ -619,12 +624,12 @@ function UncommonSubcat(data , edit,flag){
                 })
         }
     }else{
-        console.log('--- else UncommonSubcat');
+        // console.log('--- else UncommonSubcat');
 
         resolve(data)
     }
     }else{
-        console.log('--- else 1  UncommonSubcat');
+        // console.log('--- else 1  UncommonSubcat');
 
         resolve(data)
     }
@@ -635,14 +640,14 @@ function UncommonSubcat(data , edit,flag){
 
 function detailsUpdate (edit,data,resUncommonSubcat,flag){
     return new Promise(function(resolve, reject) {
-        console.log('---here in details 1',resUncommonSubcat.ExpenseDetails[0].categoryObj.subCategory.length)
+        // console.log('---here in details 1',resUncommonSubcat.ExpenseDetails[0].categoryObj.subCategory.length)
     if(resUncommonSubcat.ExpenseDetails && flag){
         for (var k = 0; k < resUncommonSubcat.ExpenseDetails.length; k++) {
-            console.log('--here in details 2 ')
+            // console.log('--here in details 2 ')
             for (var m = 0; m < resUncommonSubcat.ExpenseDetails[k].categoryObj.subCategory.length; m++) {
-                console.log('--here in details 3',edit.ExpenseDetails[0].categoryObj.subCategory[5])
+                // console.log('--here in details 3',edit.ExpenseDetails[0].categoryObj.subCategory[5])
                 if(resUncommonSubcat.ExpenseDetails[k].categoryObj.subCategory[m].details.length === 0 ){
-                    console.log('--here in details 4',resUncommonSubcat.ExpenseDetails[0].categoryObj.subCategory[5]);
+                    // console.log('--here in details 4',resUncommonSubcat.ExpenseDetails[0].categoryObj.subCategory[5]);
                     
                     Expense.findOneAndUpdate(
                         {
@@ -660,7 +665,7 @@ function detailsUpdate (edit,data,resUncommonSubcat,flag){
                                 console.log('---erre', err);
                                 reject(err)
                             }else{
-                                console.log('-------------details upadte');
+                                // console.log('-------------details upadte');
                                 
                                 resolve(Update3)
                             }   
@@ -704,9 +709,6 @@ module.exports.updateExpense = function (req, res, next) {
     let expense = req.body
     Expense.findById(_id, function (err, expenseUpdate) {
         if (err) return handleError(err, req, res, next)
-        // console.log('expenseUpdate',expenseUpdate);
-        // console.log('expense.ExpenseDetails',expense.ExpenseDetails);
-
         let update = expenseUpdate.ExpenseDetails.push(expense.ExpenseDetails[0])
         Expense.findByIdAndUpdate(_id, expenseUpdate, { new: true }, function (err, Update) {
             if (err) return handleError(err, req, res, next)
@@ -714,10 +716,6 @@ module.exports.updateExpense = function (req, res, next) {
                 res.json({ success: true, error: false, message: 'expense ' + _id + '  updated', data: Update })
 
         })
-        // 
-        // else
-        // res.json({success: true, error: false, message:'expense '+ _id +'  updated', data:expenseUpdate})
-
     })
 }
 
@@ -750,68 +748,70 @@ module.exports.notAciveExpense = function (req, res, next) {
 module.exports.editOneCatExpense = function (req, res, next) {
     let expenseCat = req.body
     let _id =(req.params.id)
-    // console.log('-- in getoneexpense req.session',req.session.userInfo._id,_id);
-    
-    Expense.findOne({ '_id':expenseCat._id, 'isActive': true,'createdBy._id':req.session.userInfo._id}, function (err, expenseByIdDoc) {
-        if (err) return handleError(err, req, res, next)
-        // console.log('expenseCat',expenseCat,);
-        
-        let docModified = JSON.parse(JSON.stringify(expenseByIdDoc))
-        // console.log('-- before editCategory',docModified.ExpenseDetails[0].categoryObj.subCategory[0]);
-        let count
-        // let activeCat = []
-        let editCategory
-        expenseByIdDoc.ExpenseDetails.forEach((subCat, indexSub) => {
-            // let isActivSubCat = []
-            console.log('---subCat',( expenseCat.categoryObj._id._id) === ( subCat.categoryObj._id));
+    console.log('---- in else part of editOneCatExpense ');
+        Expense.findOne({ '_id':expenseCat._id, 'isActive': true,'createdBy._id':req.session.userInfo._id}, function (err, expenseByIdDoc) {
+            if (err) return handleError(err, req, res, next)
+            // console.log('expenseCat',expenseCat,);
             
-            if (( expenseCat.categoryObj._id._id) === ( subCat.categoryObj._id)) {
-                // expenseByIdDoc
-                docModified.ExpenseDetails[indexSub].categoryObj.subCategory =expenseCat.categoryObj.subCategory
-                subCat.categoryObj.subCategory.forEach((amount,i)=>{
-                    amount.details.forEach((addAmount , addAmountIndex)=>{                        
-                        count = count + addAmount.amount
-                        if(addAmountIndex === amount.details.length-1 ){
-                            docModified.ExpenseDetails[indexSub].categoryObj.subCategory.amount = count
-                            count = 0
-                        }
+            let docModified = JSON.parse(JSON.stringify(expenseByIdDoc))
+            // console.log('-- before editCategory',docModified.ExpenseDetails[0].categoryObj.subCategory[0]);
+            
+            // let activeCat = []
+            let editCategory
+            expenseByIdDoc.ExpenseDetails.forEach((subCat, indexSub) => {
+                // let isActivSubCat = []
+                // console.log('---subCat',( expenseCat.categoryObj._id._id) === ( subCat.categoryObj._id));
+                let count = 0
+                if (( expenseCat.categoryObj._id._id) === ( subCat.categoryObj._id)) {
+                    // expenseByIdDoc
+                    docModified.ExpenseDetails[indexSub].categoryObj.subCategory =expenseCat.categoryObj.subCategory
+                    expenseCat.categoryObj.subCategory.forEach((amount,i)=>{
+                        // console.log('--amount',amount);                    
+                        amount.details.forEach((addAmount , addAmountIndex)=>{                        
+                            count = count + addAmount.amount
+                            // console.log('--count',count,addAmountIndex,amount.details.length);                        
+                            if(addAmountIndex === amount.details.length-1 ){
+                                // console.log('--- herererer---000');
+                                
+                                docModified.ExpenseDetails[indexSub].categoryObj.subCategory[i].amount = count
+                                count = 0
+                            }
 
+                        })
                     })
-                })
-                console.log('-- heree docModified',docModified.ExpenseDetails[indexSub].categoryObj.subCategory[0]);
+                    // console.log('-- heree docModified',docModified.ExpenseDetails[indexSub].categoryObj.subCategory[0]);
 
-            }
+                }
+            })
+        Expense.update({'_id':expenseCat._id}, {'ExpenseDetails':docModified.ExpenseDetails}, function (err, updatedExpense) {
+            if (err) return handleError(err, req, res, next)
+            res.json({ error: false, success: true, message: '', data: updatedExpense })
+
+
         })
-    Expense.update({'_id':expenseCat._id}, {'ExpenseDetails':docModified.ExpenseDetails}, function (err, updatedExpense) {
-        if (err) return handleError(err, req, res, next)
-        res.json({ error: false, success: true, message: '', data: updatedExpense })
-
-
-    })
-        
-    })
-
+            
+    })   
 }
 module.exports.getOneExpense = function (req, res, next) {
     let expenseCat = req.body
     let _id =(req.params.id)
-    console.log('-- in getoneexpense req.session',req.session.userInfo._id,_id);
+    // console.log('-- in getoneexpense req.session',req.session.userInfo._id,_id);
     
     Expense.findOne({ '_id':_id, 'isActive': true,'createdBy._id':req.session.userInfo._id}, function (err, expenseByIdDoc) {
         if (err) return handleError(err, req, res, next)
-        console.log('expenseCat',expenseCat,expenseByIdDoc);
+        // console.log('expenseCat',expenseCat,expenseByIdDoc);
         
         // let activeCat = []
         let editCategory
         expenseByIdDoc.ExpenseDetails.forEach((subCat, indexSub) => {
             // let isActivSubCat = []
-            console.log('---subCat',( expenseCat.categoryId) ,( subCat._id.toString()));
+            // console.log('---subCat',( expenseCat.categoryId) ,( subCat._id.toString()));
             
             if (( expenseCat.categoryId) === ( subCat._id.toString())) {
                 editCategory = subCat
             }
         })
-        console.log('--editCategory',editCategory);
+        // console.log('--editCategory',editCategory);
         
         let obj = {
             _id: expenseByIdDoc._id,
@@ -825,7 +825,7 @@ module.exports.getOneExpense = function (req, res, next) {
         }
         // activeCat = activeCat.concat(obj)
 
-        console.log('---obj', obj);
+        // console.log('---obj', obj);
 
         res.json({ error: false, success: true, message: '', data: obj })
     })
@@ -834,25 +834,17 @@ module.exports.getOneExpense = function (req, res, next) {
 module.exports.deleteExpense = function (req, res, next) {
     let _id = req.params.id
     let expense = req.body
-    console.log('expense', expense);
+    // console.log('expense', expense);
 
     Expense.findOne({ _id }).exec(function (err, doc) {
 
         console.log('details', doc.expenseOn[1]._id.toString(),
             doc.expenseOn[0]._id, expense, expense._id)
-
-        // if(doc.expenseOn[0]._id.toString() == expense._id.toString()){
-        //     console.log('Hey we are eqaul')
-        // }else{
-        //     console.log(':-(')
-        // }
-
-
         let index = doc.expenseOn.map(function (e) {
             return e._id.toString()
         }).indexOf(expense._id.toString())
 
-        console.log('index', index)
+        // console.log('index', index)
 
         Expense.findOneAndUpdate({ '_id': _id, 'expenseOn._id': expense._id },
             {
@@ -868,45 +860,72 @@ module.exports.deleteExpense = function (req, res, next) {
 }
 module.exports.report = function (req, res, next) {
     let expense = req.body
-    Expense.find({}).populate({path:'ExpenseDetails.categoryObj._id'}).exec( (err, doc) => {
+    Expense.find({}).populate({path:'ExpenseDetails.categoryObj._id'}).sort({expenseDate:-1}).exec( (err, doc) => {
         if (err) return handleError(err, res, req, next)
         let i = []
         if (expense.startDate) {
             doc.forEach(function (ele, index) {
                 // console.log('ele.expenseDate', ele.expenseDate, new Date(new Date(expense.startDate).setHours(0, 0, 0, 0)), (new Date(expense.startDate).setHours(0, 0, 0, 0)), new Date(new Date(expense.endDate).setHours(0, 0, 0, 0)));
-                let dateObj = new Date(ele.expenseDate) >= new Date(new Date(expense.startDate).setHours(0, 0, 0, 0))
-                    && new Date(ele.expenseDate) <= new Date(new Date(expense.endDate).setHours(23, 59, 59, 999))
+                let dateObj = new Date(ele.expenseDate).setMinutes(new Date(ele.expenseDate).getMinutes() + 330) >= new Date(new Date(expense.startDate).setUTCHours(0, 0, 0, 0))
+                    && new Date(ele.expenseDate).setMinutes(new Date(ele.expenseDate).getMinutes() + 330) <= new Date(new Date(expense.endDate).setUTCHours(23, 59, 59, 999))
                 // console.log('dateObj', dateObj);
                 if (dateObj) {
                     i = i.concat(ele)
                 }
             })
-            res.json({ success: true, error: false, message: 'expense  data', data: i })
+            if(expense.categoryName){
+                let selectedCategory =[]
+            //    console.log('--expense.categoryName',expense.categoryName,i.length);
+                i.forEach((expenses,indexExpense)=>{
+                    // console.log('--expense',i.length,indexExpense);
+                    let catFlag = false
+                    expenses.ExpenseDetails.forEach((category,categoryIndex)=>{
+                        // console.log('--category',expense.categoryName,category.categoryObj._id.category,category.categoryObj._id.category== expense.categoryName);
+                        
+                        // console.log('--indexExpense',indexExpense);
+                        // i[indexExpense].ExpenseDetails = []
+                        if(category.categoryObj._id.category == expense.categoryName){                            
+                            // selectedCategory=selectedCategory.concat(category) 
+                            catFlag = true                           
+                            i[indexExpense].ExpenseDetails[0]=category
+                            // console.log('--i',i[indexExpense].ExpenseDetails[0] ,i[indexExpense]._id);
+                            
+                        }
+                        if(!catFlag){
+                            i[indexExpense].ExpenseDetails = []
+                        }
+                    })   
+                    if(indexExpense === i.length -1 ){
+                        // console.log('--I -- INDEX',i);
+                        
+                        var filteredOutUndefined = i.filter(function (el) {
+                            // console.log('===',el.ExpenseDetails.length ,el.ExpenseDetails);
+                            
+                            return el.ExpenseDetails.length > 0;
+                            });
+                        res.json({ success: true, error: false, message: 'expense  data', data: filteredOutUndefined})
+                    }           
+                
+                })
+                // console.log('--i',i);
+                
+            }else{
+                // console.log('in else')
+                res.json({ success: true, error: false, message: 'expense  data', data: i })
+            }
         }
-        // res.json({success: true, error: false, message: 'expense  data', data: i})
-
     })
 }
 module.exports.setNotActiveExpense = function (req, res, next) {
     let _id = req.params.id
     let expense = req.body
-    console.log('expense', expense);
+    // console.log('expense', expense);
     Expense.findOne({ _id }).exec(function (err, doc) {
-
-        console.log('details', doc)
-
-        // if(doc.expenseOn[0]._id.toString() == expense._id.toString()){
-        //     console.log('Hey we are eqaul')
-        // }else{
-        //     console.log(':-(')
-        // }
-
-
         let index = doc.expenseOn.subCategory.map(function (e) {
             return e._id.toString()
         }).indexOf(expense._id.toString())
 
-        console.log('index', index)
+        // console.log('index', index)
 
         Expense.findOneAndUpdate({ '_id': _id, 'expenseOn._id': expense._id },
             {
@@ -923,23 +942,13 @@ module.exports.setNotActiveExpense = function (req, res, next) {
 module.exports.setNotActiveSubCat = function (req, res, next) {
     let _id = req.params.id
     let expense = req.body
-    console.log('expense', expense);
+    // console.log('expense', expense);
     Expense.findOne({ _id }).exec(function (err, doc) {
-
-        console.log('details', doc)
-
-        // if(doc.expenseOn[0]._id.toString() == expense._id.toString()){
-        //     console.log('Hey we are eqaul')
-        // }else{
-        //     console.log(':-(')
-        // }
-
-
         let index = doc.expenseOn.subCategory.map(function (e) {
             return e._id.toString()
         }).indexOf(expense._id.toString())
 
-        console.log('index', index)
+        // console.log('index', index)
 
         Expense.findOneAndUpdate({ '_id': _id, 'expenseOn._id': expense._id },
             {
@@ -952,4 +961,131 @@ module.exports.setNotActiveSubCat = function (req, res, next) {
     })
 
 
+}
+
+module.exports.dateWiseReport = (req,res,next)=>{
+    let expense = req.body
+    let catAmount = []
+    // console.log('--expense.flag',expense);
+    // new Date(ele.endDate).setMinutes(new Date(ele.endDate).getMinutes() + 330)
+    if(expense.flag =='month'){
+     // THE DATE OBJECT.
+    var dt = new Date(expense.value);
+    // console.log('--day',new Date());
+    
+    // var month = dt.getMonth(),
+    // year = dt.getFullYear();
+
+    // GET THE MONTH AND YEAR OF THE SELECTED DATE.
+    var month =expense.month,
+    year = expense.year
+    // console.log('--- month',month);
+    // console.log('--- year',year);
+
+    // GET THE FIRST AND LAST DATE OF THE MONTH.
+    let FirstDay = new Date(year, month-1, 2 );
+    let LastDay = new Date(year, month );
+    // console.log('--- FirstDay',FirstDay);
+    // console.log('--- LastDay',LastDay);
+    expense.startDate = FirstDay
+    expense.endDate = LastDay
+    }
+    if(expense.flag =='day'){
+        expense.startDate = expense.value
+        expense.endDate = expense.value
+        
+    }
+    if(expense.flag =='year'){
+        var year = expense.year //Any Year
+        
+        // GET THE FIRST AND LAST DATE OF THE YEAR.
+        let FirstDay = new Date(year, 0, 2);
+        let LastDay = new Date(year, 11, 32);
+        // console.log('-FirstDay',FirstDay);
+        // console.log('-LastDay',LastDay);                     
+        expense.startDate = FirstDay
+        expense.endDate = LastDay
+        // console.log('---new startDate',new Date(expense.startDate).setUTCHours(0, 0, 0, 0));
+        // console.log('--new endDate', new Date(expense.endDate).setUTCHours(23, 59, 59, 999));
+    }
+    Expense.find({}).populate({path:'ExpenseDetails.categoryObj._id',select:'category'}).exec( (err, doc) => {
+        if (err) return handleError(err, res, req, next)
+        let i = []
+            doc.forEach(function (ele, index) {
+                let startDate = new Date(expense.startDate).setMinutes(new Date(ele.startDate).getMinutes() + 330)
+                let endDate = new Date(expense.endDate).setMinutes(new Date(ele.endDate).getMinutes() + 330)
+
+                let dateObj = new Date(ele.expenseDate)>= new Date(expense.startDate).setUTCHours(0, 0, 0, 0)
+                &&  new Date(ele.expenseDate) <= new Date(expense.endDate).setUTCHours(23, 59, 59, 999)
+            if (dateObj) {
+                i = i.concat(ele)
+            }
+            if (index === doc.length - 1) {
+                i.forEach((ele,docIndex)=>{
+                    // console.log('--ele',ele);
+                    
+                    ele.ExpenseDetails.forEach((ExpenseDetails,ExpenseDetailsIndex)=>{
+                        let subCategoryAmount = 0
+                        ExpenseDetails.categoryObj.subCategory.forEach((subCategory,subCategoryIndex)=>{
+                            if(subCategory.amount){
+                                subCategoryAmount = subCategoryAmount+subCategory.amount
+                            }
+                        })                       
+                        // let data = {
+                        //     category:ExpenseDetails.categoryObj._id.category ,
+                        //     amount:subCategoryAmount
+                        // }
+                        let data = {
+                            name:ExpenseDetails.categoryObj._id.category ,
+                            y:subCategoryAmount
+                        }
+                        let exist =catAmount.filter(f => f.name===ExpenseDetails.categoryObj._id.category );
+                        // console.log('--exist',exist.length ,exist,ExpenseDetails.categoryObj._id.category);
+                        
+                        if(exist.length == 0){
+
+                            catAmount = catAmount.concat(data)
+                        }else{
+                            let index =catAmount.map((e)=>{
+                                return e.name
+                            }).indexOf(ExpenseDetails.categoryObj._id.category)
+                            
+                            catAmount[index].y = catAmount[index].y + subCategoryAmount
+                            
+                        }
+                    })
+                })
+            }
+        })
+        // console.log('i.length',i.length,catAmount);        
+        res.json({ success: true, error: false, message: 'expense  data', data: catAmount })
+    })
+}
+
+module.exports.categoryFilter = (req,res,next)=>{
+    let expense = req.body
+    let catAmount = []
+    // let modifiedExpense = JSON.parse(JSON.stringify(expense))
+    expense.startDate = ''
+        expense.endDate = ''
+    console.log('--expense.flag',expense);
+   
+    Expense.find({}).populate({path:'ExpenseDetails.categoryObj._id',select:'category'}).exec( (err, doc) => {
+        if (err) return handleError(err, res, req, next)
+        let i = []
+            doc.forEach(function (ele, index) {
+                let dateObj = new Date(ele.expenseDate).setMinutes(new Date(ele.expenseDate).getMinutes() + 330)>= new Date(expense.startDate).setUTCHours(0, 0, 0, 0)
+                &&  new Date(ele.expenseDate).setMinutes(new Date(ele.expenseDate).getMinutes() + 330) <= new Date(expense.endDate).setUTCHours(23, 59, 59, 999)
+            if (dateObj) {
+                i = i.concat(ele)
+            }
+            if (index === doc.length - 1) {
+                i.forEach((ele,docIndex)=>{
+                    
+                })
+            }
+        })
+        // console.log('i.length',i.length,catAmount);        
+        res.json({ success: true, error: false, message: 'expense  data', data: catAmount })
+    })
 }
