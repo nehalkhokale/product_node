@@ -1,6 +1,6 @@
 const Expense = require('../models/Expense')
 const Category = require('../models/Category')
-
+"use strict";
 handleError = function (err, req, res, next) {
     res.status(500).send({ success: false, error: true, message: `${err.message}` })
 }
@@ -964,9 +964,14 @@ module.exports.setNotActiveSubCat = function (req, res, next) {
 }
 
 module.exports.dateWiseReport = (req,res,next)=>{
+    console.log('--here');
+    
     let expense = req.body
     let catAmount = []
-    // console.log('--expense.flag',expense);
+    x = 9
+    // console.log('--a',x);
+    
+    console.log('--expense.flag',expense);
     // new Date(ele.endDate).setMinutes(new Date(ele.endDate).getMinutes() + 330)
     if(expense.flag =='month'){
      // THE DATE OBJECT.
@@ -993,6 +998,8 @@ module.exports.dateWiseReport = (req,res,next)=>{
     if(expense.flag =='day'){
         expense.startDate = expense.value
         expense.endDate = expense.value
+        console.log('--expense.value',expense.value);
+        
         
     }
     if(expense.flag =='year'){
@@ -1001,8 +1008,8 @@ module.exports.dateWiseReport = (req,res,next)=>{
         // GET THE FIRST AND LAST DATE OF THE YEAR.
         let FirstDay = new Date(year, 0, 2);
         let LastDay = new Date(year, 11, 32);
-        // console.log('-FirstDay',FirstDay);
-        // console.log('-LastDay',LastDay);                     
+        console.log('-FirstDay',FirstDay);
+        console.log('-LastDay',LastDay);                     
         expense.startDate = FirstDay
         expense.endDate = LastDay
         // console.log('---new startDate',new Date(expense.startDate).setUTCHours(0, 0, 0, 0));
@@ -1014,27 +1021,24 @@ module.exports.dateWiseReport = (req,res,next)=>{
             doc.forEach(function (ele, index) {
                 let startDate = new Date(expense.startDate).setMinutes(new Date(ele.startDate).getMinutes() + 330)
                 let endDate = new Date(expense.endDate).setMinutes(new Date(ele.endDate).getMinutes() + 330)
-
-                let dateObj = new Date(ele.expenseDate)>= new Date(expense.startDate).setUTCHours(0, 0, 0, 0)
-                &&  new Date(ele.expenseDate) <= new Date(expense.endDate).setUTCHours(23, 59, 59, 999)
+                // let dateObj = new Date(ele.expenseDate)>= new Date(expense.startDate).setMinutes(new Date(expense.startDate).getMinutes() + 330)
+                // &&  new Date(ele.expenseDate) <= new Date(expense.endDate).setMinutes(new Date(expense.endDate).getMinutes() + 330)
+                let dateObj = new Date(ele.expenseDate)>= new Date(new Date(expense.startDate).setHours(0, 0, 0, 0))
+                &&  new Date(ele.expenseDate) <= new Date(new Date(expense.endDate).setHours(23, 59, 59, 999))
             if (dateObj) {
                 i = i.concat(ele)
             }
             if (index === doc.length - 1) {
+                console.log('--i',i);
+                
                 i.forEach((ele,docIndex)=>{
-                    // console.log('--ele',ele);
-                    
                     ele.ExpenseDetails.forEach((ExpenseDetails,ExpenseDetailsIndex)=>{
                         let subCategoryAmount = 0
                         ExpenseDetails.categoryObj.subCategory.forEach((subCategory,subCategoryIndex)=>{
                             if(subCategory.amount){
                                 subCategoryAmount = subCategoryAmount+subCategory.amount
                             }
-                        })                       
-                        // let data = {
-                        //     category:ExpenseDetails.categoryObj._id.category ,
-                        //     amount:subCategoryAmount
-                        // }
+                        })
                         let data = {
                             name:ExpenseDetails.categoryObj._id.category ,
                             y:subCategoryAmount

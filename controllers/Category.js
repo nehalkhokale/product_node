@@ -1,5 +1,4 @@
 const Category = require('../models/Category')
-var diff = require('deep-diff');
 
 handleError = function (err, req, res, next) {
     res.status(500).send({ success: false, error: true, message: `${err.message}` })

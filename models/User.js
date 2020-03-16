@@ -52,6 +52,21 @@ const UserSchema = new mongoose.Schema({
         ref: 'Role',
         default: 1
     },
+    budget:{
+        type:{
+            type: String,
+            enum: ['Month','Year'],
+        },
+        value: {
+            type:Number
+        },
+        firstTrigger:{
+            type:Number
+        },
+        lastTrigger:{
+            type:Number
+        }
+    },
     // role:{
     //     type: String,
     //     enum: ['Admin','User'],

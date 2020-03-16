@@ -65,12 +65,14 @@ exports.login = (req, res, next) => {
                 }
 
                 req.session.token = token
-                // console.log('----after', req.session);
-
+                let userDetail = JSON.parse(JSON.stringify(data))
+                userDetail.token ='Bearer ' + token
+                delete userDetail.hash
                 res.json({
                     success: true,
                     message: 'Authentication successful!',
-                    token: 'Bearer ' + token
+                    data:userDetail ,
+                    // token: 'Bearer ' + token
                 });
                 let createdAt = Date.now()
                 Token.update({ email: req.body.email }, { token: token, createdAt: createdAt }, { upsert: true, setDefaultsOnInsert: true }, (err, doc) => {
@@ -102,6 +104,9 @@ exports.login = (req, res, next) => {
 module.exports.changePassword = (req, res, next) => {
     let request = req.body
     let id = req.body._id
+    req.body.email = req.session.userInfo.email
+    console.log('--req.body.email ',req.body.email );
+    
     User.findOne({
         'email': req.body.email
     }, (err, data) => {

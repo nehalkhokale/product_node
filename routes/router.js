@@ -5,6 +5,8 @@ const User= require('../controllers/User')
 const Category = require('../controllers/Category')
 const Roles = require('../controllers/Role')
 const Expense = require('../controllers/Expense')
+const Budget = require('../controllers/Budget')
+
 // check default route
 router.get('/', (req, res) => {
     res.json({
@@ -50,6 +52,7 @@ router.delete('/expense/:id', Expense.deleteExpense)
 router.delete('/expense/subcatnotactive/:id', Expense.setNotActiveSubCat)
 router.post('/getreport', Expense.report)
 router.post('/dateWiseReport',Expense.dateWiseReport)
+router.post ('/totalBudget',Budget.totalBudget)
 router.put('/expense/getexpensebyid/:id',Expense.getOneExpense)
 router.put('/expense/editcatexpense/:id',Expense.editOneCatExpense)
 
