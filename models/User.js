@@ -52,6 +52,9 @@ const UserSchema = new mongoose.Schema({
         ref: 'Role',
         default: 1
     },
+    image: {
+        type:String,
+    },
     budget:{
         type:{
             type: String,
@@ -81,6 +84,7 @@ const UserSchema = new mongoose.Schema({
     remarks:{
         type: String,
 },
+ 
     hash: String,
     salt: String,
 }, {

@@ -16,8 +16,8 @@ const ErrorHandler = require('./utility/ErrorHandler').handleError
 // Scheduler.contractLocking()
 //  DATABASE CONNECTION
 /* eslint no-unused-vars: ["error", { "varsIgnorePattern": "[iI]gnored" }]*/
-
-
+// const multer = require('multer')
+// const upload = multer ({dest:'/uploads/'})
 const dbIgnored = require(`${__dirname}/./database/connect`)
 //  CONFIG
 const config = require(`${__dirname}/./config/config`)
@@ -110,9 +110,20 @@ session.Session.prototype.login = (req, user, cb) => {
     app.use(config.app.prefix, router)
 // }
 
-
+app.use(express.static('uploads'));
 //  app.use(config.app.prefix, router)
 app.use(ErrorHandler)
+// app.use((err, req, res, next) => {
+//     res.locals.error = err;
+//     const status = err.status || 500;
+//     res.status(status);
+//     console.log('--status',status,res.locals.error);
+    
+//     res.render('', {
+//         pageTitle: 'Reset Your Password',
+//         user: 'req.user'
+//       });
+//   });
 //  START THE SERVER
 app.listen((process.env.PORT || config.server.port))
 module.exports = app // for testing
