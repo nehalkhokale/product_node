@@ -344,3 +344,15 @@ module.exports.deleteUser = function (req, res, next) {
 
 
 }
+module.exports.checkAdmin = (req, res, next) => {
+    User.findById(req.session.userInfo._id).exec((err,userObject)=>{
+        if(userObject.admin){
+            next()
+        }else{
+            // res.statusCode = 403
+            res.status(403)
+            return res.json({'error': true, success: false, 'message': 'You are not authorized to perform this operation!', data: []});
+        }
+
+    })
+}

@@ -6,7 +6,6 @@ const UserCollection = require('../models/User')
 const Category = require('../controllers/Category')
 const Roles = require('../controllers/Role')
 const Expense = require('../controllers/Expense')
-const Budget = require('../controllers/Budget')
 const multer = require('multer')
 var fs = require('fs');
 var url = require('url');
@@ -124,7 +123,7 @@ router.post('/user/changepassword', User.changePassword)
 router.post('/createuser', User.create)
 router.put('/updateuser/:id', User.update)
 router.get('/userbyid/:id',User.getOne)
-router.get('/userlist', User.getAllUser)
+router.get('/userlist', User.checkAdmin ,User.getAllUser)
 router.put('/deleteuser/:id', User.notAciveUser)
 router.delete('/user/:id', User.deleteUser)
 
@@ -149,10 +148,7 @@ router.delete('/expense/subcatnotactive/:id', Expense.setNotActiveSubCat)
 router.post('/getreport', Expense.report)
 router.post('/dateWiseReport',Expense.dateWiseReport)
 
-//Budget
-router.post ('/totalBudget',Budget.totalBudget)
-router.post ('/createbudget',Budget.createBudget)
-router.get ('/totalamountspent',Budget.totalAmountSpent)
+
 
 router.put('/expense/getexpensebyid/:id',Expense.getOneExpense)
 router.put('/expense/editcatexpense/:id',Expense.editOneCatExpense)
@@ -165,9 +161,6 @@ router.get('/rolelist', Roles.getAllUser)
 router.put('/deleterole/:id', Roles.notAciveUser)
 router.delete('/role/:id', Roles.deleteUser)
 
-//Email
-router.post('/createrapp', Budget.createApp)
-router.post('/sendemail', Budget.sendEmail)
 
 
 module.exports = router

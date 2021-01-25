@@ -10,6 +10,10 @@ const UserSchema = new mongoose.Schema({
         match: [/\S+@\S+\.\S+/, 'is invalid'],
         index: true,
     },
+    admin:{
+        type:Boolean,
+        default:false
+    },
     name: {
         salutation: String,
         firstName: {
