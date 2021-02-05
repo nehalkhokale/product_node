@@ -3,12 +3,9 @@ const router = new express.Router()
 const constants = require('../constants/constants')
 const User= require('../controllers/User')
 const UserCollection = require('../models/User')
-const Category = require('../controllers/Category')
-const Roles = require('../controllers/Role')
-const Expense = require('../controllers/Expense')
+const Rent = require('../controllers/Rent')
 const multer = require('multer')
 var fs = require('fs');
-var url = require('url');
 
 // var storage = multer.diskStorage({
 //     destination: function (req, file, cb) {
@@ -128,39 +125,13 @@ router.put('/deleteuser/:id', User.notAciveUser)
 router.delete('/user/:id', User.deleteUser)
 
 
-//Category 
-router.post('/createCategory', Category.createCategory)
-// router.put('/updateCategory/:id', Category.updateCategory)
-router.put('/updateCategory/:id',Category.subCategoryUpdate)
-router.get('/categorybyid/:id', Category.getOne)
-router.get('/categorylist', Category.getAllCategory)
-router.put('/deletecategory/:id', Category.notAciveCategory)
-router.delete('/category/:id', Category.deleteCategory)
-
-//Expense
-router.post('/createexpense', Expense.createExpense)
-router.put('/expense/:id', Expense.updateExpense)
-router.get('/expenselist', Expense.getAllExpense)
-router.get('/expense/getsubcategory/:id',Expense.addSubCategory)
-router.delete('/expense/expensenotactive/:id', Expense.notAciveExpense)
-router.delete('/expense/:id', Expense.deleteExpense)
-router.delete('/expense/subcatnotactive/:id', Expense.setNotActiveSubCat)
-router.post('/getreport', Expense.report)
-router.post('/dateWiseReport',Expense.dateWiseReport)
-
-
-
-router.put('/expense/getexpensebyid/:id',Expense.getOneExpense)
-router.put('/expense/editcatexpense/:id',Expense.editOneCatExpense)
-
-//Role
-router.post('/createrole', Roles.create)
-router.put('/updaterole/:id', Roles.update)
-router.get('/rolebyid/:id',Roles.getOne)
-router.get('/rolelist', Roles.getAllUser)
-router.put('/deleterole/:id', Roles.notAciveUser)
-router.delete('/role/:id', Roles.deleteUser)
-
+//Rent 
+router.post('/rent', Rent.create)
+router.get('/rent/:id', Rent.getOne)
+router.get('/rentlist', Rent.getAll)
+router.put('/rent/:id', Rent.update)
+router.put('/deleterent/:id', Rent.notAvailable)
+router.delete('/rent/:id', Rent.delete)
 
 
 module.exports = router

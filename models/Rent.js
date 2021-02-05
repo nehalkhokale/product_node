@@ -2,12 +2,12 @@ const mongoose = require('mongoose')
 const uniqueValidator = require('mongoose-unique-validator')
 const autoIncrement = require("mongoose-auto-increment")
 
-const categorySchema = new mongoose.Schema({
-    category: {
+const rentSchema = new mongoose.Schema({
+    address: {
         type: String,
         unique:true
     },
-    subCategory:[{
+    item:[{
             name :{
                 type: String,
                 unique:true
@@ -17,11 +17,21 @@ const categorySchema = new mongoose.Schema({
                 default:true,
             }
     }],
+    price:{
+        type:Number,
+    },
     isActive:{
         type:Boolean,
         default:true,
     },
-    createdBy: {
+    isRented:{
+        type:Boolean,
+        default:false,
+    },
+    tenant:{
+        type: mongoose.Schema.Types.Mixed, 
+    },
+    ownerName: {
         type: mongoose.Schema.Types.Mixed,
     },
     updatedBy: {
@@ -36,9 +46,9 @@ const categorySchema = new mongoose.Schema({
 
 autoIncrement.initialize(mongoose.connection)
 
-categorySchema.plugin(uniqueValidator, {
+rentSchema.plugin(uniqueValidator, {
     message: 'already exists.',
 })
-categorySchema.plugin(autoIncrement.plugin, 'Category')
-const Category = mongoose.model('Category', categorySchema)
-module.exports = Category
+rentSchema.plugin(autoIncrement.plugin, 'Rent')
+const Rent = mongoose.model('Rent', rentSchema)
+module.exports = Rent
